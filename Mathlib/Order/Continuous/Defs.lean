@@ -54,6 +54,11 @@ theorem IsWayBelow.monotone_right {α : Type u} [PartialOrder α]
   specialize hxy s lub h_ne h_dir h_lub (hyz.trans hy)
   exact Set.inter_nonempty.mp hxy
 
+@[trans]
+theorem IsWayBelow.trans {α : Type u} [PartialOrder α] {{x y z : α}}
+    (hxy : IsWayBelow x y) (hyz : IsWayBelow y z) : IsWayBelow x z := by
+  exact hxy.monotone_right hyz.le
+
 -- TODO: projections
 def IsWayBelowGeneratedBy {α : Type u}
   [PartialOrder α] [SupSet α] (y : α) (s : Set α) : Prop :=
