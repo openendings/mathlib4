@@ -20,7 +20,7 @@ def IsWayBelow {α : Type u} [PartialOrder α] (x y : α) : Prop :=
   y ≤ u → ∃ z ∈ s, x ≤ z
 
 @[simp]
-theorem IsWayBelow.iff {α : Type u} [PartialOrder α] (x y : α) :
+theorem isWayBelow_iff {α : Type u} [PartialOrder α] (x y : α) :
     (IsWayBelow x y) ↔ ∀ (s : Set α) (u : α), s.Nonempty →
     DirectedOn (· ≤ ·) s → IsLUB s u → y ≤ u → ∃ z ∈ s, x ≤ z
   := by rfl
