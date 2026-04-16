@@ -1,6 +1,26 @@
 module
 
-public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Order.Basic
+public import Mathlib.Order.Bounds.Basic
+public import Mathlib.Order.Directed
+
+/-!
+# The way-below relation and continuous partial orders
+
+This file defines the way-below relation ("order of approximation") and continuous partial orders,
+together with basic properties.
+
+## Main definitions
+
+* `IsWayBelow`: the way-below relation (aka order of approximation) induced by a `PartialOrder`.
+  `IsWayBelow x y` denotes, loosely speaking, that every "cover" of `y` contains a finite "subcover"
+  of `x`.
+
+* `IsWayBelowBasis`
+
+* `IsContinuousPartialOrder`
+
+-/
 
 @[expose]
 public section
@@ -8,6 +28,11 @@ public section
 namespace Order
 
 universe u
+
+/-
+TODO(style): Is this an appropriate use case for
+`variable {α : Type u} [PartialOrder α]`?
+-/
 
 /--
 `x << y` ("`x` is way below `y`") when,
@@ -19,6 +44,13 @@ def IsWayBelow {α : Type u} [PartialOrder α] (x y : α) : Prop :=
   ∀ (s : Set α) (u : α), s.Nonempty → DirectedOn (· ≤ ·) s → IsLUB s u →
   y ≤ u → ∃ z ∈ s, x ≤ z
 
+/-!
+Examples:
+* `ℕ`: `IsWayBelow = Nat.le`.
+* `ℝ`, `ℚ`: `IsWayBelow x y` iff `x < y`.
+* `Set α`: `IsWayBelow s t` iff `s ⊆ t ∧ Finite s`.
+-/
+
 @[simp]
 theorem isWayBelow_iff {α : Type u} [PartialOrder α] (x y : α) :
     (IsWayBelow x y) ↔ ∀ (s : Set α) (u : α), s.Nonempty →
@@ -28,12 +60,14 @@ theorem isWayBelow_iff {α : Type u} [PartialOrder α] (x y : α) :
 /--
 `x << y` implies `x ≤ y`.
 -/
-theorem IsWayBelow.le {α : Type u} [inst : PartialOrder α] {{x y : α}}
+theorem isWayBelow_le {α : Type u} [inst : PartialOrder α] (x y : α)
     (h : IsWayBelow x y) : x ≤ y := by
   specialize h {y} y (Set.singleton_nonempty y) (directedOn_singleton y)
     (isLUB_singleton) (le_refl y)
-  rcases h with ⟨y', ⟨hy, hxy⟩⟩
-  exact le_of_le_of_eq hxy hy
+  simp_all only [Set.mem_singleton_iff, exists_eq_left]
+
+theorem IsWayBelow.le {α : Type u} [inst : PartialOrder α] {{x y : α}}
+    (h : IsWayBelow x y) : x ≤ y := isWayBelow_le x y h
 
 /--
 `z ≤ x << y` implies `z << y`.
@@ -59,19 +93,53 @@ theorem IsWayBelow.trans {α : Type u} [PartialOrder α] {{x y z : α}}
     (hxy : IsWayBelow x y) (hyz : IsWayBelow y z) : IsWayBelow x z := by
   exact hxy.monotone_right hyz.le
 
--- TODO: projections
-def IsWayBelowGeneratedBy {α : Type u}
-  [PartialOrder α] [SupSet α] (y : α) (s : Set α) : Prop :=
+/--
+A basis is a set with the property that every element in the poset is the
+directed sup of the basis elements way below it.
+-/
+def IsWayBelowBasis {α : Type u} [PartialOrder α] (b : Set α) : Prop :=
+  ∀ y : α,
+  {x ∈ b | IsWayBelow x y}.Nonempty
+  ∧
+  DirectedOn (· ≤ ·) {x ∈ b | IsWayBelow x y}
+  ∧
+  IsLUB {x ∈ b | IsWayBelow x y} y
+
+theorem isWayBelowBasis_iff {α : Type u}
+    [PartialOrder α] (s : Set α) : IsWayBelowBasis s ↔ ∀ y : α,
+    {x ∈ s | IsWayBelow x y}.Nonempty
+    ∧
+    DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+    ∧
+    IsLUB {x ∈ s | IsWayBelow x y} y := by rfl
+
+/--
+A continuous partial order ("continuous poset") is a partial order that admits a way-below basis.
+-/
+def IsContinuousPartialOrder (α : Type u)
+  [PartialOrder α] : Prop :=
+Nonempty {s : Set α | IsWayBelowBasis s}
+
+/--
+Analogue of `Nonempty.elim` for continuous partial orders.
+If `IsContinuousPartialOrder α`, and we can
+prove `p` given any basis `b : Set α`, then `p` holds.
+-/
+theorem IsContinuousPartialOrder.elim {α : Type u} [PartialOrder α] {p : Prop}
+  (h₁ : IsContinuousPartialOrder α) (h₂ : ∀ (b : Set α), IsWayBelowBasis b → p) : p
+    := by
+  refine Nonempty.elim h₁ ?_
+  aesop
+
+-- TODO a bundled Order.ContinuousPartialOrder
+
+abbrev IsDirSupOfWayBelow {α : Type u}
+  [PartialOrder α] (y : α) (s : Set α) : Prop :=
   {x ∈ s | IsWayBelow x y}.Nonempty
   ∧
   DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
   ∧
   IsLUB {x ∈ s | IsWayBelow x y} y
--- TODO is there a weaker interpolation property?
--- TODO should we just skip straight to "basis of a subset"
-
--- TODO basis
---proof_wanted isWayBelow_interpolation
 
 end Order
 
