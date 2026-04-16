@@ -24,4 +24,8 @@ theorem compact_element_wayBelow_iff {α : Type u} [PartialOrder α] {x : α}
     (h : IsCompactElement x) (y : α) : IsWayBelow x y ↔ x ≤ y := by
   exact Iff.intro (IsWayBelow.le ·) (IsWayBelow.monotone_right h ·)
 
+-- TODO a Scott-cts function is determined by its action on the basis
+
+-- TODO in a continuous domain, way-below iff Scott-open interior contains
+
 end Order

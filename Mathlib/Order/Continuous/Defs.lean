@@ -1,6 +1,8 @@
 module
 
-public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Order.Basic
+public import Mathlib.Order.Bounds.Basic
+public import Mathlib.Order.Directed
 
 @[expose]
 public section
@@ -8,6 +10,11 @@ public section
 namespace Order
 
 universe u
+
+/-
+TODO(style): Is this an appropriate use case for
+`variable {α : Type u} [PartialOrder α]`?
+-/
 
 /--
 `x << y` ("`x` is way below `y`") when,
@@ -59,23 +66,6 @@ theorem IsWayBelow.trans {α : Type u} [PartialOrder α] {{x y z : α}}
     (hxy : IsWayBelow x y) (hyz : IsWayBelow y z) : IsWayBelow x z := by
   exact hxy.monotone_right hyz.le
 
-def IsDirSupOfWayBelow {α : Type u}
-  [PartialOrder α] (y : α) (s : Set α) : Prop :=
-  {x ∈ s | IsWayBelow x y}.Nonempty
-  ∧
-  DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
-  ∧
-  IsLUB {x ∈ s | IsWayBelow x y} y
-
--- TODO: iff for the SupSet case
-
--- TODO: projections for the conjuncts of IsDirSupOfWayBelow
-
-
-proof_wanted le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
-    (s : Set α) {{x y : α}} (hxy : x ≤ y) (hy : IsDirSupOfWayBelow y s) :
-    ∃ z ∈ s, IsWayBelow z y ∧ ¬z ≤ x
-
 /--
 A basis is a set with the property that every element in the poset is the
 directed sup of the basis elements way below it.
@@ -99,20 +89,6 @@ theorem isWayBelowBasis_iff {α : Type u}
     ∧
     IsLUB {x ∈ s | IsWayBelow x y} y := by rfl
 
-theorem isWayBelowBasis_iff_all_dirSupOfWayBelow_self {α : Type u}
-    [PartialOrder α] (s : Set α) :
-    IsWayBelowBasis s ↔ ∀ y : α, IsDirSupOfWayBelow y s := by rfl
-/-
-TODO(style): is this rfl too implementation dependent?
--/
-
-/--
-Convenience projection method for `this.dirSupOfWayBelow`.
--/
-theorem IsWayBelowBasis.dirSupOfWayBelow {α : Type u} [PartialOrder α]
-    (s : Set α) (hs : IsWayBelowBasis s) (y : α) :
-    IsDirSupOfWayBelow y s := by tauto
-
 /--
 A continuous partial order ("continuous poset") is a partial order that admits a way-below basis.
 -/
@@ -121,6 +97,44 @@ def IsContinuousPartialOrder (α : Type u)
   ∃ s : Set α, IsWayBelowBasis s
 
 -- TODO a bundled Order.ContinuousPartialOrder
+
+section Elementwise
+
+/--
+A elememt-specific version of IsWayBelowBasis.
+
+TODO(RFC): Is this premature abstraction?
+-/
+def IsDirSupOfWayBelow {α : Type u}
+  [PartialOrder α] (y : α) (s : Set α) : Prop :=
+  {x ∈ s | IsWayBelow x y}.Nonempty
+  ∧
+  DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+  ∧
+  IsLUB {x ∈ s | IsWayBelow x y} y
+
+-- TODO: iff for the SupSet case
+
+/--
+Convenience projection method for `this.dirSupOfWayBelow`.
+-/
+theorem IsWayBelowBasis.dirSupOfWayBelow {α : Type u} [PartialOrder α]
+    (s : Set α) (hs : IsWayBelowBasis s) (y : α) :
+    IsDirSupOfWayBelow y s := by tauto
+
+theorem isWayBelowBasis_iff_all_dirSupOfWayBelow_self {α : Type u}
+    [PartialOrder α] (s : Set α) :
+    IsWayBelowBasis s ↔ ∀ y : α, IsDirSupOfWayBelow y s := by rfl
+/-
+TODO(style): is this rfl too implementation dependent?
+-/
+
+-- TODO: projections for the conjuncts of IsDirSupOfWayBelow
+
+proof_wanted le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
+    (s : Set α) {{x y : α}} (hxy : x ≤ y) (hy : IsDirSupOfWayBelow y s) :
+    ∃ z ∈ s, IsWayBelow z y ∧ ¬z ≤ x
+end Elementwise
 
 end Order
 
