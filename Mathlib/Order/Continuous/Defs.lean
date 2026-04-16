@@ -59,19 +59,68 @@ theorem IsWayBelow.trans {α : Type u} [PartialOrder α] {{x y z : α}}
     (hxy : IsWayBelow x y) (hyz : IsWayBelow y z) : IsWayBelow x z := by
   exact hxy.monotone_right hyz.le
 
--- TODO: projections
-def IsWayBelowGeneratedBy {α : Type u}
-  [PartialOrder α] [SupSet α] (y : α) (s : Set α) : Prop :=
+def IsDirSupOfWayBelow {α : Type u}
+  [PartialOrder α] (y : α) (s : Set α) : Prop :=
   {x ∈ s | IsWayBelow x y}.Nonempty
   ∧
   DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
   ∧
   IsLUB {x ∈ s | IsWayBelow x y} y
--- TODO is there a weaker interpolation property?
--- TODO should we just skip straight to "basis of a subset"
 
--- TODO basis
---proof_wanted isWayBelow_interpolation
+-- TODO: iff for the SupSet case
+
+-- TODO: projections for the conjuncts of IsDirSupOfWayBelow
+
+
+proof_wanted le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
+    (s : Set α) {{x y : α}} (hxy : x ≤ y) (hy : IsDirSupOfWayBelow y s) :
+    ∃ z ∈ s, IsWayBelow z y ∧ ¬z ≤ x
+
+/--
+A basis is a set with the property that every element in the poset is the
+directed sup of the basis elements way below it.
+-/
+def IsWayBelowBasis {α : Type u}
+    [PartialOrder α] (s : Set α) : Prop :=
+  ∀ y : α,
+  {x ∈ s | IsWayBelow x y}.Nonempty
+  ∧
+  DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+  ∧
+  IsLUB {x ∈ s | IsWayBelow x y} y
+
+-- TODO: `IsWayBelowBasis` iff for the SupSet case
+
+theorem isWayBelowBasis_iff {α : Type u}
+    [PartialOrder α] (s : Set α) : IsWayBelowBasis s ↔ ∀ y : α,
+    {x ∈ s | IsWayBelow x y}.Nonempty
+    ∧
+    DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+    ∧
+    IsLUB {x ∈ s | IsWayBelow x y} y := by rfl
+
+theorem isWayBelowBasis_iff_all_dirSupOfWayBelow_self {α : Type u}
+    [PartialOrder α] (s : Set α) :
+    IsWayBelowBasis s ↔ ∀ y : α, IsDirSupOfWayBelow y s := by rfl
+/-
+TODO(style): is this rfl too implementation dependent?
+-/
+
+/--
+Convenience projection method for `this.dirSupOfWayBelow`.
+-/
+theorem IsWayBelowBasis.dirSupOfWayBelow {α : Type u} [PartialOrder α]
+    (s : Set α) (hs : IsWayBelowBasis s) (y : α) :
+    IsDirSupOfWayBelow y s := by tauto
+
+/--
+A continuous partial order ("continuous poset") is a partial order that admits a way-below basis.
+-/
+def IsContinuousPartialOrder (α : Type u)
+    [PartialOrder α] : Prop :=
+  ∃ s : Set α, IsWayBelowBasis s
+
+-- TODO a bundled Order.ContinuousPartialOrder
 
 end Order
 
