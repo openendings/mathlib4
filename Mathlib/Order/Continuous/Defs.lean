@@ -4,6 +4,26 @@ public import Mathlib.Order.Basic
 public import Mathlib.Order.Bounds.Basic
 public import Mathlib.Order.Directed
 
+/-!
+# The way-below relation and continuous partial orders
+
+This file defines the way-below relation ("order of approximation") and continuous partial orders,
+together with basic properties.
+([Domain Theory, 2.2][abramsky_gabbay_maibaum_1994]).
+
+## Main definitions
+
+* `WayBelow`: the way-below relation (aka order of approximation) induced by a `PartialOrder`.
+  `x` is way-below `y` whenever
+
+TODO(RFC):
+
+## References
+
+* [Abramsky and Jung, *Domain Theory*][abramsky_gabbay_maibaum_1994]
+
+-/
+
 @[expose]
 public section
 
@@ -100,8 +120,11 @@ def IsContinuousPartialOrder (α : Type u)
 
 section Elementwise
 
+-- TODO: extract this into a separate branch for initial RFC.
+
 /--
-A elememt-specific version of IsWayBelowBasis.
+A generalisation of `IsWayBelowBasis` to individual elements.
+Its only use case is `le_dirSupOfWayBelow_separation` in `Mathlib/Order/Continuous/Basic.lean`.
 
 TODO(RFC): Is this premature abstraction?
 -/
@@ -131,11 +154,9 @@ TODO(style): is this rfl too implementation dependent?
 
 -- TODO: projections for the conjuncts of IsDirSupOfWayBelow
 
-proof_wanted le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
-    (s : Set α) {{x y : α}} (hxy : x ≤ y) (hy : IsDirSupOfWayBelow y s) :
-    ∃ z ∈ s, IsWayBelow z y ∧ ¬z ≤ x
 end Elementwise
 
 end Order
 
 end
+#lint
