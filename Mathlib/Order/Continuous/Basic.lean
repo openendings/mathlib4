@@ -31,7 +31,10 @@ section
 
 universe u v
 
-variable {α : Type u} [PartialOrder α]
+variable {α : Type u}
+
+theorem isWayBelow_subrelation [inst : PartialOrder α] :
+    Subrelation IsWayBelow inst.le := (IsWayBelow.le ·)
 
 theorem isWayBelow_iff_principal_filter_intersects {α : Type u}
   [PartialOrder α] (x y : α) : (IsWayBelow x y) ↔
@@ -56,9 +59,7 @@ theorem compact_element_wayBelow_iff {α : Type u} [PartialOrder α] {x : α}
 
 section _WayBelowBasis
 
-proof_wanted wayBelowBasis_directed (b : Set α) (hb : IsWayBelowBasis b) : DirectedOn (· ≤ ·) b
-
-proof_wanted compact_element_mem_wayBelowBasis {x : α} (h : IsCompactElement x)
+proof_wanted compact_element_mem_wayBelowBasis [PartialOrder α] {x : α} (h : IsCompactElement x)
     (b : Set α) (hb : IsWayBelowBasis b) : x ∈ b
 
 /-
@@ -114,8 +115,8 @@ The interpolation property: the way-belows of an element are boundedly-directed
 
 TODO: weaken this to the non OrderBot ("DCPO") case
 -/
-proof_wanted wayBelow_interpolation {α : Type u} [CompletePartialOrder α] (b : Set α)
-    (hb : IsWayBelowBasis b) (s : Finset α) (y : α) (h : ∀ x ∈ s, IsWayBelow x y) :
+proof_wanted wayBelow_interpolation {α : Type u} [ConditionallyCompletePartialOrder α] [OrderTop α]
+  (b : Set α) (hb : IsWayBelowBasis b) (s : Finset α) (y : α) (h : ∀ x ∈ s, IsWayBelow x y) :
     Nonempty {z ∈ b | (∀ x ∈ s, IsWayBelow x z) ∧ IsWayBelow z y}
 
 /--
@@ -123,10 +124,10 @@ A Scott-continuous function is determined by its action on the basis.
 -/
 proof_wanted ScottContinuous.wayBelowBasis_restrict_uniq
     {α : Type u} {β : Type v} [PartialOrder α] [PartialOrder β]
-    {s : Set α}
-    {f : s → β} (h : ScottContinuous f)
-    (hb : IsWayBelowBasis s) :
-    Subsingleton { g : α → β | ScottContinuous g ∧ s.restrict g = f}
+    {b : Set α}
+    {f : b → β} (h : ScottContinuous f)
+    (hb : IsWayBelowBasis b) :
+    Subsingleton { g : α → β | ScottContinuous g ∧ b.restrict g = f}
 
 /--
 A Scott-continuous function on the basis uniquely extends to a Scott-continuous function on the
@@ -135,16 +136,21 @@ partial order.
 proof_wanted ScottContinuous.wayBelowBasis_uniq_extension
     {α : Type u} {β : Type v} [ConditionallyCompletePartialOrder α]
     [ConditionallyCompletePartialOrder β] [OrderTop β]
-    {s : Set α}
-    {f : s → β} (h : ScottContinuous f)
-    (hb : IsWayBelowBasis s) :
-    ∃! g : α → β, ScottContinuous g ∧ s.restrict g = f
+    {b : Set α}
+    {f : b → β} (h : ScottContinuous f)
+    (hb : IsWayBelowBasis b) :
+    ∃! g : α → β, ScottContinuous g ∧ b.restrict g = f
 
 end _WayBelowBasis
 
 section _DirSup
 
--- TODO in a continuous dcpo, neighbourhood base
+proof_wanted FOO_BAR
+    [ConditionallyCompletePartialOrder α] (hc : IsContinuousPartialOrder α)
+    {s : Set α} :
+    DirSupInacc s ↔ s = Set.sUnion {{y ∈ s | IsWayBelow x y} | x ∈ s}
+
+-- TODO in a continuous dcpo, Scott-open iff way above something
 
 -- TODO in a continuous dcpo, way-below iff Scott-open interior contains
 
