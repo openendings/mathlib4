@@ -9,18 +9,16 @@ public import Mathlib.Order.Directed
 
 This file defines the way-below relation ("order of approximation") and continuous partial orders,
 together with basic properties.
-([Domain Theory, 2.2][abramsky_gabbay_maibaum_1994]).
 
 ## Main definitions
 
-* `WayBelow`: the way-below relation (aka order of approximation) induced by a `PartialOrder`.
-  `x` is way-below `y` whenever
+* `IsWayBelow`: the way-below relation (aka order of approximation) induced by a `PartialOrder`.
+  `IsWayBelow x y` denotes, loosely speaking, that every "cover" of `y` contains a finite "subcover"
+  of `x`.
 
-TODO(RFC):
+* `IsWayBelowBasis`
 
-## References
-
-* [Abramsky and Jung, *Domain Theory*][abramsky_gabbay_maibaum_1994]
+* `IsContinuousPartialOrder`
 
 -/
 
