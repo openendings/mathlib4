@@ -14,7 +14,13 @@ import Mathlib.Order.UpperLower.Principal
 ## Main results
 
 * `wayBelowBasis_separation_not_le`
+* `ScottContinuous.wayBelowBasis_restrict_inj`
 * `ScottContinuous.wayBelowBasis_unique_extension`
+* `proof_wanted scott_open_iff_eq_union_of_way_above_mem`
+
+TODO: `Mathlib/Topology/Order/ScottTopology/Continuous.lean`
+[Domain Theory, Lemma 2.3.8][abramsky_gabbay_maibaum_1994]: "In a continuous [and OrderTop] CondCPO,
+every Scott-open set is a union of Scott-open filters."
 
 ## References
 
@@ -155,19 +161,21 @@ proof_wanted wayBelow_interpolation {α : Type u} [ConditionallyCompletePartialO
 /--
 A Scott-continuous function is determined by its action on the basis.
 -/
-proof_wanted ScottContinuous.wayBelowBasis_restrict_uniq
+proof_wanted ScottContinuous.wayBelowBasis_restrict_inj
     {α : Type u} {β : Type v} [PartialOrder α] [PartialOrder β]
     {b : Set α}
-    {f : b → β} (h : ScottContinuous f)
-    (hb : IsWayBelowBasis b) :
-    Subsingleton { g : α → β | ScottContinuous g ∧ b.restrict g = f}
+    (hb : IsWayBelowBasis b)
+    {f : α → β} (hf : ScottContinuous f)
+    {g : α → β} (hg : ScottContinuous g)
+  :
+    b.restrict f = b.restrict g ↔ f = g
 
 /--
 A Scott-continuous function on the basis uniquely extends to a Scott-continuous function on the
 partial order.
 -/
 proof_wanted ScottContinuous.wayBelowBasis_uniq_extension
-    {α : Type u} {β : Type v} [ConditionallyCompletePartialOrder α]
+    {α : Type u} {β : Type v} [PartialOrder α]
     [ConditionallyCompletePartialOrder β] [OrderTop β]
     {b : Set α}
     {f : b → β} (h : ScottContinuous f)
@@ -178,16 +186,23 @@ end _WayBelowBasis
 
 section _DirSup
 
-proof_wanted FOO_BAR
+namespace Continuous
+
+proof_wanted dirSupInacc_iff_forall_mem_nonempty_way_belows
     [ConditionallyCompletePartialOrder α] (hc : IsContinuousPartialOrder α)
     {s : Set α} :
-    DirSupInacc s ↔ s = Set.sUnion {{y ∈ s | IsWayBelow x y} | x ∈ s}
+    DirSupInacc s ↔ ∀ y ∈ s, Nonempty {x ∈ s | IsWayBelow x y}
 
--- TODO in a continuous dcpo, Scott-open iff way above something
+proof_wanted scott_open_iff_eq_union_of_way_above_mem
+    [ConditionallyCompletePartialOrder α] (hc : IsContinuousPartialOrder α)
+    {s : Set α} :
+    IsUpperSet s ∧ DirSupInacc s ↔ s = Set.sUnion {{y ∈ s | IsWayBelow x y} | x ∈ s}
 
 -- TODO in a continuous dcpo, way-below iff Scott-open interior contains
 
 -- TODO in a continuous dcpo, every Scott-open set is a union of Scott-open filters
+
+end Continuous
 
 end _DirSup
 
