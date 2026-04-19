@@ -7,9 +7,10 @@ import Mathlib.Order.UpperLower.Principal
 
 /-
 # The way-below relation and continuous partial orders
--/
--- TODO
-/-
+
+This file provides basic results about the way-below relation and continuous partial orders
+([Domain Theory, 2.2][abramsky_gabbay_maibaum_1994]).
+Definitions are in `Defs.lean`.
 
 ## Main results
 
