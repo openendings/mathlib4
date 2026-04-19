@@ -114,7 +114,7 @@ A continuous partial order ("continuous poset") is a partial order that admits a
 -/
 def IsContinuousPartialOrder (α : Type u)
     [PartialOrder α] : Prop :=
-  ∃ s : Set α, IsWayBelowBasis s
+  Nonempty {s : Set α | IsWayBelowBasis s}
 
 -- TODO a bundled Order.ContinuousPartialOrder
 
