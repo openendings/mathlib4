@@ -110,22 +110,12 @@ theorem isWayBelowBasis_iff {α : Type u}
 A continuous partial order ("continuous poset") is a partial order that admits a way-below basis.
 -/
 def IsContinuousPartialOrder (α : Type u)
-    [PartialOrder α] : Prop :=
-  Nonempty {s : Set α | IsWayBelowBasis s}
+  [PartialOrder α] : Prop :=
+Nonempty {s : Set α | IsWayBelowBasis s}
 
 -- TODO a bundled Order.ContinuousPartialOrder
 
-section Elementwise
-
--- TODO: extract this into a separate branch for initial RFC.
-
-/--
-A generalisation of `IsWayBelowBasis` to individual elements.
-Its only use case is `le_dirSupOfWayBelow_separation` in `Mathlib/Order/Continuous/Basic.lean`.
-
-TODO(RFC): Is this premature abstraction?
--/
-def IsDirSupOfWayBelow {α : Type u}
+abbrev IsDirSupOfWayBelow {α : Type u}
   [PartialOrder α] (y : α) (s : Set α) : Prop :=
   {x ∈ s | IsWayBelow x y}.Nonempty
   ∧
@@ -133,27 +123,6 @@ def IsDirSupOfWayBelow {α : Type u}
   ∧
   IsLUB {x ∈ s | IsWayBelow x y} y
 
--- TODO: iff for the SupSet case
-
-/--
-Convenience projection method for `this.dirSupOfWayBelow`.
--/
-theorem IsWayBelowBasis.dirSupOfWayBelow {α : Type u} [PartialOrder α]
-    (s : Set α) (hs : IsWayBelowBasis s) (y : α) :
-    IsDirSupOfWayBelow y s := by tauto
-
-theorem isWayBelowBasis_iff_all_dirSupOfWayBelow_self {α : Type u}
-    [PartialOrder α] (s : Set α) :
-    IsWayBelowBasis s ↔ ∀ y : α, IsDirSupOfWayBelow y s := by rfl
-/-
-TODO(style): is this rfl too implementation dependent?
--/
-
--- TODO: projections for the conjuncts of IsDirSupOfWayBelow
-
-end Elementwise
-
 end Order
 
 end
-#lint
