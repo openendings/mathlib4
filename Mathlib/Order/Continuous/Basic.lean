@@ -95,6 +95,39 @@ theorem le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
     simp only [Set.mem_setOf_eq, and_imp]
     exact h
 
+theorem isWayBelowBasis_iff_csSup
+    [inst : ConditionallyCompleteLattice α]
+    (s : Set α) : IsWayBelowBasis s ↔ ∀ y : α,
+    {x ∈ s | IsWayBelow x y}.Nonempty
+    --TODO
+    ∧
+    DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+    ∧
+    y = sSup {x ∈ s | IsWayBelow x y} := by
+  simp_all only [isWayBelowBasis_iff]
+  congrm ∀ y, ?_
+  simp only [and_congr_right_iff]
+  intro h_ne h_dir
+  show IsLUB {x ∈ s | IsWayBelow x y} y ↔ y = sSup {x ∈ s | IsWayBelow x y}
+  refine ⟨?mp, ?mpr⟩
+  case mp =>
+    intro h
+    exact Eq.symm <| IsLUB.csSup_eq  h h_ne
+  case mpr =>
+    intro h
+    obtain h' : BddAbove {x | x ∈ s ∧ IsWayBelow x y} := by
+      apply (bddAbove_iff_exists_ge y).mpr
+      use y
+      apply And.intro (le_refl y)
+      suffices ∀ x, (x ∈ s ∧ IsWayBelow x y) → x ≤ y by
+        exact fun y_2 a ↦ le_of_eq_of_le rfl (this y_2 a)
+      intro x
+      clear h_ne h_dir h
+      grind only [isWayBelow_le]
+    generalize {x | x ∈ s ∧ IsWayBelow x y} = b_y at *
+    subst h
+    exact ConditionallyCompletePartialOrderSup.isLUB_csSup_of_directed b_y h_dir h_ne h'
+
 /--
 `¬x ≤ y` is witnessed by a basis element.
 -/
