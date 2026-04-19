@@ -55,12 +55,14 @@ theorem isWayBelow_iff {α : Type u} [PartialOrder α] (x y : α) :
 /--
 `x << y` implies `x ≤ y`.
 -/
-theorem IsWayBelow.le {α : Type u} [inst : PartialOrder α] {{x y : α}}
+theorem isWayBelow_le {α : Type u} [inst : PartialOrder α] (x y : α)
     (h : IsWayBelow x y) : x ≤ y := by
   specialize h {y} y (Set.singleton_nonempty y) (directedOn_singleton y)
     (isLUB_singleton) (le_refl y)
-  rcases h with ⟨y', ⟨hy, hxy⟩⟩
-  exact le_of_le_of_eq hxy hy
+  simp_all only [Set.mem_singleton_iff, exists_eq_left]
+
+theorem IsWayBelow.le {α : Type u} [inst : PartialOrder α] {{x y : α}}
+    (h : IsWayBelow x y) : x ≤ y := isWayBelow_le x y h
 
 /--
 `z ≤ x << y` implies `z << y`.
@@ -90,16 +92,13 @@ theorem IsWayBelow.trans {α : Type u} [PartialOrder α] {{x y z : α}}
 A basis is a set with the property that every element in the poset is the
 directed sup of the basis elements way below it.
 -/
-def IsWayBelowBasis {α : Type u}
-    [PartialOrder α] (s : Set α) : Prop :=
+def IsWayBelowBasis {α : Type u} [PartialOrder α] (b : Set α) : Prop :=
   ∀ y : α,
-  {x ∈ s | IsWayBelow x y}.Nonempty
+  {x ∈ b | IsWayBelow x y}.Nonempty
   ∧
-  DirectedOn (· ≤ ·) {x ∈ s | IsWayBelow x y}
+  DirectedOn (· ≤ ·) {x ∈ b | IsWayBelow x y}
   ∧
-  IsLUB {x ∈ s | IsWayBelow x y} y
-
--- TODO: `IsWayBelowBasis` iff for the SupSet case
+  IsLUB {x ∈ b | IsWayBelow x y} y
 
 theorem isWayBelowBasis_iff {α : Type u}
     [PartialOrder α] (s : Set α) : IsWayBelowBasis s ↔ ∀ y : α,
