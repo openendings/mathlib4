@@ -5883,6 +5883,7 @@ public import Mathlib.Order.ConditionallyCompleteLattice.Indexed
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Basic
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Defs
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Indexed
+public import Mathlib.Order.Continuous.Defs
 public import Mathlib.Order.Copy
 public import Mathlib.Order.CountableDenseLinearOrder
 public import Mathlib.Order.Cover
