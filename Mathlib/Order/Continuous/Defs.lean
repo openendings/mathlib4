@@ -120,6 +120,17 @@ def IsContinuousPartialOrder (α : Type u)
   [PartialOrder α] : Prop :=
 Nonempty {s : Set α | IsWayBelowBasis s}
 
+/--
+Analogue of `Nonempty.elim` for continuous partial orders.
+If `IsContinuousPartialOrder α`, and we can
+prove `p` given any basis `b : Set α`, then `p` holds.
+-/
+theorem IsContinuousPartialOrder.elim {α : Type u} [PartialOrder α] {p : Prop}
+  (h₁ : IsContinuousPartialOrder α) (h₂ : ∀ (b : Set α), IsWayBelowBasis b → p) : p
+    := by
+  refine Nonempty.elim h₁ ?_
+  aesop
+
 -- TODO a bundled Order.ContinuousPartialOrder
 
 abbrev IsDirSupOfWayBelow {α : Type u}
