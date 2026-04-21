@@ -51,6 +51,9 @@ theorem isWayBelow_iff_principal_filter_intersects {α : Type u}
 
 -- TODO: finite products of way-below relation
 
+theorem bot_wayBelow_bot {α : Type u} [PartialOrder α] [OrderBot α] :
+    IsWayBelow (⊥ : α) ⊥ := by aesop
+
 /--
 The way-below relation generalizes compactness.
 -/
