@@ -44,6 +44,13 @@ def IsWayBelow {α : Type u} [PartialOrder α] (x y : α) : Prop :=
   ∀ (s : Set α) (u : α), s.Nonempty → DirectedOn (· ≤ ·) s → IsLUB s u →
   y ≤ u → ∃ z ∈ s, x ≤ z
 
+/-!
+Examples:
+* `ℕ`: `IsWayBelow = Nat.le`.
+* `ℝ`, `ℚ`: `IsWayBelow x y` iff `x < y`.
+* `Set α`: `IsWayBelow s t` iff `s ⊆ t ∧ Finite s`.
+-/
+
 @[simp]
 theorem isWayBelow_iff {α : Type u} [PartialOrder α] (x y : α) :
     (IsWayBelow x y) ↔ ∀ (s : Set α) (u : α), s.Nonempty →
