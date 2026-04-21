@@ -1,11 +1,13 @@
-import Mathlib.Order.CompactlyGenerated.Basic
-import Mathlib.Order.CompletePartialOrder
-import Mathlib.Order.Continuous.Defs
-import Mathlib.Order.DirSupClosed
-import Mathlib.Order.ScottContinuity
-import Mathlib.Order.UpperLower.Principal
+module
 
-/-
+public import Mathlib.Order.CompactlyGenerated.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Order.Continuous.Defs
+public import Mathlib.Order.DirSupClosed
+public import Mathlib.Order.ScottContinuity
+public import Mathlib.Order.UpperLower.Principal
+
+/-!
 # The way-below relation and continuous partial orders
 
 This file provides basic results about the way-below relation and continuous partial orders
@@ -34,7 +36,8 @@ domain theory, way below, order of approximation, continuous partial order, cont
 
 namespace Order
 
-section
+@[expose]
+public section
 
 universe u v
 
