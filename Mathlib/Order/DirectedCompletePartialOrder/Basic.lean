@@ -22,4 +22,14 @@ Definitions are in `Mathlib/Order/DirectedCompletePartialOrder/Defs.lean`.
 
 variable {ι : Sort*} {α : Type*} [DirectedCompletePartialOrder α]
 
+-- TODO: Scott continuous homset is a dcpo
+
+-- TODO: mk of Refl
+
+-- TODO: closure under Prod
+
+-- TODO: ckosure under Disjoint
+
+-- TODO: WithBot induces an adjunction with CompletePartialOrder
+
 end
