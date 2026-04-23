@@ -43,8 +43,6 @@ directed complete partial order, directedly complete partial order, dcpo
 
 @[expose] public section
 
-variable {ι : Sort*} {α : Type*}
-
 /--
 Directed complete partial orders are partial orders
 where every nonempty, directed set has a least upper bound.
@@ -58,8 +56,23 @@ class DirectedCompletePartialOrder (α : Type*)
 
   -- TODO(rfc): once LawfulSup exists, drop the `SupSet` and go for `Nonempty {u | IsLUB d u}`?
 
+variable {ι : Sort*} {α : Type*}
+
+/--
+Create a `DirectedCompletePartialOrder` from a `PartialOrder` and `SupSet`
+such that for every nonempty directed set `d`, `sSup d` is the least upper bound of `d`.
+-/
+@[reducible]
+def DirectedCompletePartialOrder.ofLubOfNonemptyDirected
+    [PartialOrder α] [SupSet α]
+    (lub_of_nonempty_directed : ∀ d : Set α, d.Nonempty → DirectedOn (· ≤ ·) d → IsLUB d (sSup d)) :
+    DirectedCompletePartialOrder α where
+  lubOfNonemptyDirected := lub_of_nonempty_directed
+
 -- TODO(review): these next ones are verbatim from ConditionallyCompletePartialOrder and
 -- CompletePartialOrder.
+
+section DirectedSets
 
 variable [DirectedCompletePartialOrder α]
 
@@ -87,5 +100,7 @@ protected lemma Directed.le_dirISup (hf : Directed (· ≤ ·) f)
 protected lemma Directed.dirISup_le [Nonempty ι] (hf : Directed (· ≤ ·) f)
     (ha : ∀ i, f i ≤ a) : ⨆ i, f i ≤ a :=
   hf.directedOn_range.dirSSup_le (Set.range_nonempty _) <| Set.forall_mem_range.2 ha
+
+end DirectedSets
 
 end
