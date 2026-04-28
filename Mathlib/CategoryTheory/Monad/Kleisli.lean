@@ -8,6 +8,9 @@ module
 public import Mathlib.CategoryTheory.Adjunction.Basic
 public import Mathlib.CategoryTheory.Monad.Basic
 
+import Batteries.Tactic.PrintPrefix
+import Mathlib.Tactic.Check
+
 /-! # Kleisli category on a (co)monad
 
 This file defines the Kleisli category on a monad `(T, η_ T, μ_ T)` as well as the co-Kleisli
@@ -46,6 +49,9 @@ lemma of_mk (c : C) : (Kleisli.mk T c).of = c := rfl
 theorem comp {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
     (f ≫ T.η.app Y) ≫ T.map (g ≫ T.η.app Z) ≫ T.μ.app Z = (f ≫ g) ≫ T.η.app Z := by
   simp [Monad.unit_naturality, Monad.mu_naturality, Monad.right_unit_assoc]
+
+theorem map_map_of (X : Kleisli T) : (T.toFunctor ⋙ T.toFunctor).obj X.of = T.obj (T.obj X.of) := by
+  rfl
 
 /-- For (T : Monad C), morphisms `c ⟶ c'` in the Kleisli category of `T` are
 morphisms ` c ⟶ T.obj c'` in `C`. -/
@@ -92,6 +98,23 @@ def toKleisli : C ⥤ Kleisli T where
     unfold_projs
     rw [comp]
 
+@[simp]
+theorem toKleisli_foo {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ Z) :
+    Y ⟶ T.obj (of ?m.10)
+    X Y:= by
+  trivial
+
+theorem foo {X Y Z : C} (f : X ⟶ Y) (g : Y ⟶ T.obj Z) :
+    Hom.mk (f ≫ g) = (toKleisli T).map f ≫ Hom.mk g := by
+  unfold_projs
+  apply hom_ext
+  simp [toKleisli_map_of]
+  set_option pp.explicit true in
+    #defeq_abuse in
+    simp [Functor.map_id]
+  simp_rw [←(T.η.naturality_assoc g)]
+  hint
+
 /-- The right adjoint of the adjunction which induces the monad `(T, η_ T, μ_ T)`. -/
 @[simps]
 def fromKleisli : Kleisli T ⥤ C where
@@ -106,6 +129,9 @@ def fromKleisli : Kleisli T ⥤ C where
       (T.μ.naturality_assoc g.of _)
     rfl
 
+  ❌️ (X ⟶ T.obj Z.of) ≃ ((toKleisli T).obj X ⟶ Z) =?= (X ⟶ (fromKleisli T).obj Z) ≃ ((toKleisli T).obj X ⟶ Z)
+
+/- #defeq_abuse in -/
 set_option backward.isDefEq.respectTransparency false in
 /-- The Kleisli adjunction which gives rise to the monad `(T, η_ T, μ_ T)`.
 cf Lemma 5.2.11 of [Riehl][riehl2017]. -/
@@ -113,13 +139,93 @@ def adj : toKleisli T ⊣ fromKleisli T :=
   Adjunction.mkOfHomEquiv
     { homEquiv X Y := { toFun f := f.of, invFun f := .mk f }
       homEquiv_naturality_left_symm := fun {X} {Y} {Z} f g => by
-        ext
+        simp only [Equiv.coe_fn_symm_mk]
+        show_term
+          suffices f ≫ g = f ≫ T.η.app Y ≫ T.map g ≫ T.μ.app Z.of by
+
+            simp_all? only [toKleisli_obj_of, fromKleisli_obj]
+            simp only [category_comp_of, toKleisli_obj_of, toKleisli_map_of, Category.assoc]
+            simp_all
         simp [← T.η.naturality_assoc g] }
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The composition of the adjunction gives the original functor. -/
 def toKleisliCompFromKleisliIsoSelf : toKleisli T ⋙ fromKleisli T ≅ T :=
   NatIso.ofComponents fun _ => Iso.refl _
+
+theorem fromKleisliCompToKleisli_obj (X : Kleisli T) :
+  (fromKleisli T ⋙ toKleisli T).obj X = Kleisli.mk T (T.toFunctor.1 X.of) := by rfl
+
+/--
+The counit of `toKleisli T ⊣ fromKleisli T` is pointwise given by `T 𝟭`.
+-/
+theorem kleisli_counit_app (X : Kleisli T) :
+  (adj T).counit.app X = Kleisli.Hom.mk (𝟙 (T.obj X.of)) := by rfl
+
+@[inherit_doc kleisli_counit_app]
+theorem kleisli_counit_app_of (X : Kleisli T) :
+  ((adj T).counit.app X).of = 𝟙 (T.obj X.of)
+  := by rfl
+
+theorem even_here ⦃X Y : Kleisli T⦄ (f : X ⟶ Y)
+  (h : (fromKleisli T ⋙ toKleisli T).map f ≫ { of := 𝟙 (T.obj Y.of) } = (adj
+  T).counit.app X ≫ (𝟭 (Kleisli T)).map f ) :
+  (fromKleisli T ⋙ toKleisli T).map f ≫ { of := 𝟙 (T.obj Y.of) } = (adj
+  T).counit.app X ≫ (𝟭 (Kleisli T)).map f := by
+  conv_rhs =>
+    equals (CategoryStruct.comp ((adj T).counit.app X) ((Functor.id (Kleisli T)).map
+        f)) =>
+      rw [← (adj T).counit.naturality]
+  exact h
+
+theorem even_here? ⦃X Y : Kleisli T⦄ (f : X ⟶ Y)
+  (g)
+  (h : g = (adj
+  T).counit.app X ≫ (𝟭 (Kleisli T)).map f ) :
+  g = (adj
+  T).counit.app X ≫ (𝟭 (Kleisli T)).map f := by
+  conv_rhs =>
+    equals (CategoryStruct.comp ((adj T).counit.app X) ((Functor.id (Kleisli T)).map
+        f)) =>
+      rw [← (adj T).counit.naturality]
+  exact h
+
+theorem id_mk_naturality
+  ⦃X Y : Kleisli T⦄ (f : X ⟶ Y) :
+    (Adjunction.fromKleisli T ⋙ Adjunction.toKleisli T).map
+    f ≫ Hom.mk ( 𝟙 (T.obj Y.of) )  =
+    Hom.mk ( 𝟙 (T.obj X.of)) ≫ (𝟭 (Kleisli T)).map f := by
+  simp_all only [← Adjunction.kleisli_counit_app]
+  /- apply even_here? -/
+  conv_rhs =>
+    equals (CategoryStruct.comp ((adj T).counit.app X) ((Functor.id (Kleisli T)).map
+        f)) =>
+      clear * - f
+      fail_if_success simp_rw [this]
+      fail_if_success rw [← (adj T).counit.naturality]
+      erw? [← (adj T).counit.naturality]
+  skip
+  simp_all?
+  sorry
+  /- simp only [fromKleisliCompToKleisli_obj] -/
+
+theorem HELPME ⦃X Y : Kleisli T⦄ (f : X ⟶ Y) : (Adjunction.fromKleisli T ⋙ Adjunction.toKleisli T).map
+    f ≫ Hom.mk ( 𝟙 (T.obj Y.of) )  =
+    Hom.mk ( 𝟙 (T.obj X.of)) ≫ (𝟭 (Kleisli T)).map f := by
+  simp_all only [← Adjunction.kleisli_counit_app]
+  extract_goal using before
+  conv_rhs =>
+    equals (CategoryStruct.comp ((adj T).counit.app X) ((Functor.id (Kleisli T)).map
+        f)) =>
+      -- simp_rw [fromKleisliCompToKleisli_obj]
+      -- have := fromKleisliCompToKleisli_obj T
+      clear * - f
+      fail_if_success simp_rw [this]
+      fail_if_success rw [← (adj T).counit.naturality]
+      erw? [← (adj T).counit.naturality]
+  extract_goal using after
+
+
 
 end Adjunction
 
@@ -195,3 +301,4 @@ end Adjunction
 end Cokleisli
 
 end CategoryTheory
+#lint
