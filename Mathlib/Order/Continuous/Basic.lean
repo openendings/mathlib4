@@ -1,4 +1,5 @@
 import Mathlib.Order.CompactlyGenerated.Basic
+import Mathlib.Order.CompletePartialOrder
 import Mathlib.Order.Continuous.Defs
 import Mathlib.Order.DirSupClosed
 import Mathlib.Order.ScottContinuity
@@ -26,7 +27,11 @@ domain theory, way below, order of approximation, continuous partial order, cont
 
 namespace Order
 
+section
+
 universe u v
+
+variable {α : Type u} [PartialOrder α]
 
 theorem isWayBelow_iff_principal_filter_intersects {α : Type u}
   [PartialOrder α] (x y : α) : (IsWayBelow x y) ↔
@@ -42,14 +47,33 @@ The way-below relation generalizes compactness.
 theorem isWayBelow_refl_iff_compact {α : Type u} [PartialOrder α] (x : α) :
     (IsWayBelow x x) ↔ IsCompactElement x := by rfl
 
+/--
+A compact element is way below its upper bounds.
+-/
 theorem compact_element_wayBelow_iff {α : Type u} [PartialOrder α] {x : α}
     (h : IsCompactElement x) (y : α) : IsWayBelow x y ↔ x ≤ y := by
   exact Iff.intro (IsWayBelow.le ·) (IsWayBelow.monotone_right h ·)
 
-/- IsWayBelowBasis -/
+section _WayBelowBasis
 
-proof_wanted wayBelowBasis_directed {α : Type u}
-    [PartialOrder α] (b : Set α) (hb : IsWayBelowBasis b) : DirectedOn (· ≤ ·) b
+proof_wanted compact_element_mem_wayBelowBasis [PartialOrder α] {x : α} (h : IsCompactElement x)
+    (b : Set α) (hb : IsWayBelowBasis b) : x ∈ b
+
+/-
+prop 2.2.4(3), CPO case
+TODO: docs.
+TODO: weaken this to the non OrderBot ("DCPO") case
+TODO: analogue for ConditionallyComplete
+-/
+proof_wanted CompletePartialOrder.wayBelowBasis_supset_isWayBelowBasis
+    [CompletePartialOrder α]
+    {b : Set α}
+    (hb : IsWayBelowBasis b)
+    {s : Set α}
+    (h : b ⊆ s)
+    :
+    IsWayBelowBasis s
+-- TODO: add the specialisation to IsWayBelowBasis (Set.univ : Set α)
 
 theorem le_dirSupOfWayBelow_separation {α : Type u} [PartialOrder α]
     (b : Set α) {{x y : α}} (hx : IsDirSupOfWayBelow x b) :
@@ -77,23 +101,60 @@ theorem wayBelowBasis_separation_not_le {α : Type u} [PartialOrder α]
     x ≤ y := by
   exact (le_dirSupOfWayBelow_separation b (hb x)).mpr hxy
 
--- TODO basis interpolation
+
+-- TODO: weaken this to the non OrderBot ("DCPO") case
+proof_wanted wayBelow_interpolation' {α : Type u} [CompletePartialOrder α] (b : Set α)
+    (hb : IsWayBelowBasis b) (y : α) :
+    DirectedOn IsWayBelow {z ∈ b | IsWayBelow z y}
+
+/--
+The interpolation property: the way-belows of an element are boundedly-directed
+
+TODO: weaken this to the non OrderBot ("DCPO") case
+-/
+proof_wanted wayBelow_interpolation {α : Type u} [ConditionallyCompletePartialOrder α] [OrderTop α]
+  (b : Set α) (hb : IsWayBelowBasis b) (s : Finset α) (y : α) (h : ∀ x ∈ s, IsWayBelow x y) :
+    Nonempty {z ∈ b | (∀ x ∈ s, IsWayBelow x z) ∧ IsWayBelow z y}
 
 /--
 A Scott-continuous function is determined by its action on the basis.
 -/
--- TODO: this should be "exists at most one", if codomain isn't DirSupClosed.
-proof_wanted ScottContinuous.wayBelowBasis_unique_extension
-    {α : Type u} {β : Type v} [PartialOrder
-    α] [PartialOrder β] {s : Set α} (hb : IsWayBelowBasis s) (f : s →
-    β) (h : ScottContinuous f) :
-    ∃! g : α → β,
-    ScottContinuous g ∧ s.restrict g = f
+proof_wanted ScottContinuous.wayBelowBasis_restrict_uniq
+    {α : Type u} {β : Type v} [PartialOrder α] [PartialOrder β]
+    {b : Set α}
+    {f : b → β} (h : ScottContinuous f)
+    (hb : IsWayBelowBasis b) :
+    Subsingleton { g : α → β | ScottContinuous g ∧ b.restrict g = f}
+
+/--
+A Scott-continuous function on the basis uniquely extends to a Scott-continuous function on the
+partial order.
+-/
+proof_wanted ScottContinuous.wayBelowBasis_uniq_extension
+    {α : Type u} {β : Type v} [ConditionallyCompletePartialOrder α]
+    [ConditionallyCompletePartialOrder β] [OrderTop β]
+    {b : Set α}
+    {f : b → β} (h : ScottContinuous f)
+    (hb : IsWayBelowBasis b) :
+    ∃! g : α → β, ScottContinuous g ∧ b.restrict g = f
+
+end _WayBelowBasis
 
 section _DirSup
 
--- TODO in a continuous domain, way-below iff Scott-open interior contains
+proof_wanted FOO_BAR
+    [ConditionallyCompletePartialOrder α] (hc : IsContinuousPartialOrder α)
+    {s : Set α} :
+    DirSupInacc s ↔ s = Set.sUnion {{y ∈ s | IsWayBelow x y} | x ∈ s}
+
+-- TODO in a continuous dcpo, Scott-open iff way above something
+
+-- TODO in a continuous dcpo, way-below iff Scott-open interior contains
+
+-- TODO in a continuous dcpo, every Scott-open set is a union of Scott-open filters
 
 end _DirSup
+
+end
 
 end Order
