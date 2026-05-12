@@ -31,7 +31,10 @@ section
 
 universe u v
 
-variable {α : Type u} [PartialOrder α]
+variable {α : Type u}
+
+theorem isWayBelow_subrelation [inst : PartialOrder α] :
+    Subrelation IsWayBelow inst.le := (IsWayBelow.le ·)
 
 theorem isWayBelow_iff_principal_filter_intersects {α : Type u}
   [PartialOrder α] (x y : α) : (IsWayBelow x y) ↔
